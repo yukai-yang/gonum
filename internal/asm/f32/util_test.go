@@ -9,10 +9,27 @@ import (
 	"testing"
 )
 
+const (
+	msgRes   = "%v: unexpected result Got: %v Expected: %v"
+	msgVal   = "%v: unexpected value at %v Got: %v Expected: %v"
+	msgGuard = "%v: Guard violated in %s vector %v %v"
+	ε        = 1e-5
+)
+
 var (
 	nan = float32(math.NaN())
 	inf = float32(math.Inf(1))
 )
+
+func within(x, y float32) bool {
+	if same(x, y) {
+		return true
+	}
+	if x > y {
+		return x-y < ε
+	}
+	return y-x < ε
+}
 
 func same(x, y float32) bool {
 	a, b := float64(x), float64(y)
@@ -21,6 +38,20 @@ func same(x, y float32) bool {
 
 func same64(a, b float64) bool {
 	return a == b || (math.IsNaN(a) && math.IsNaN(b))
+}
+
+// equalStrided returns true if the strided vector x contains elements of the
+// dense vector ref at indices i*inc, false otherwise.
+func equalStrided(ref, x []float32, inc int) bool {
+	if inc < 0 {
+		inc = -inc
+	}
+	for i, v := range ref {
+		if !same(x[i*inc], v) {
+			return false
+		}
+	}
+	return true
 }
 
 func guardVector(v []float32, g float32, gdLn int) (guarded []float32) {
