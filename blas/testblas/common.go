@@ -239,7 +239,7 @@ func makeIncremented(x []float64, inc int, extra int) []float64 {
 
 // makeIncremented32 takes a float32 slice with inc == 1 and makes an incremented version
 // and adds extra values on the end
-func makeIncremented32(x []float64, inc int, extra int) []float64 {
+func makeIncremented32(x []float32, inc int, extra int) []float32 {
 	if inc == 0 {
 		panic("zero inc")
 	}

@@ -68,12 +68,12 @@ func SgerBenchmark(b *testing.B, blasser Sgerer, m, n, incX, incY int) {
 	for i := range xr {
 		xr[i] = rand.Float32()
 	}
-	x := makeIncremented(xr, incX, 0)
+	x := makeIncremented32(xr, incX, 0)
 	yr := make([]float32, n)
 	for i := range yr {
 		yr[i] = rand.Float32()
 	}
-	y := makeIncremented(yr, incY, 0)
+	y := makeIncremented32(yr, incY, 0)
 	a := make([]float32, m*n)
 	for i := range a {
 		a[i] = rand.Float32()

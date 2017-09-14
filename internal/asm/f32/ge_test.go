@@ -183,14 +183,10 @@ func TestGer(t *testing.T) {
 	}
 }
 
-/* type sgerWrap struct{}
+type sgerWrap struct{}
 
-func (d sgerWrap) Sger(m, n int, alpha float32, x []float32, incX int, y []float32, incY int, a []float32, lda int) {
+func (d sgerWrap) Dger(m, n int, alpha float64, x []float64, incX int, y []float64, incY int, a []float64, lda int) {
 	Ger(uintptr(m), uintptr(n), alpha, x, uintptr(incX), y, uintptr(incY), a, uintptr(lda))
-}
-
-func TestBlasGer(t *testing.T) {
-	testblas.SgerTest(t, sgerWrap{})
 }
 
 func BenchmarkBlasGer(t *testing.B) {
@@ -203,11 +199,42 @@ func BenchmarkBlasGer(t *testing.B) {
 			incX, incY := inc.x, inc.y
 			t.Run(fmt.Sprintf("Sger %dx%d (%d %d)", m, n, incX, incY), func(b *testing.B) {
 				for i := 0; i < t.N; i++ {
-					testblas.SgerBenchmark(b, sgerWrap{}, m, n, incX, incY)
+					SgerBenchmark(b, sgerWrap{}, m, n, incX, incY)
 				}
 			})
-
 		}
 	}
 }
-*/
+
+func GerOld(m, n uintptr, alpha float32,
+	x []float32, incX uintptr,
+	y []float32, incY uintptr,
+	a []float32, lda uintptr) {
+
+	if incX == 1 && incY == 1 {
+		x = x[:m]
+		y = y[:n]
+		for i, xv := range x {
+			AxpyUnitary(alpha*xv, y, a[uintptr(i)*lda:uintptr(i)*lda+n])
+		}
+		return
+	}
+
+	var ky, kx uintptr
+	if incY > 0 {
+		ky = 0
+	} else {
+		ky = -(n - 1) * incY
+	}
+	if incX > 0 {
+		kx = 0
+	} else {
+		kx = -(m - 1) * incX
+	}
+
+	ix := kx
+	for i := 0; i < int(m); i++ {
+		AxpyInc(alpha*x[ix], y, a[uintptr(i)*lda:uintptr(i)*lda+n], uintptr(n), uintptr(incY), 1, uintptr(ky), 0)
+		ix += incX
+	}
+}
