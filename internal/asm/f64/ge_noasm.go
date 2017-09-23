@@ -24,15 +24,11 @@ func Ger(m, n uintptr, alpha float64,
 	}
 
 	var ky, kx uintptr
-	if incY > 0 {
-		ky = 0
-	} else {
-		ky = -(n - 1) * incY
+	if int(incY) < 0 {
+		ky = uintptr(-int(n-1) * int(incY))
 	}
-	if incX > 0 {
-		kx = 0
-	} else {
-		kx = -(m - 1) * incX
+	if int(incX) < 0 {
+		kx = uintptr(-int(m-1) * int(incX))
 	}
 
 	ix := kx
