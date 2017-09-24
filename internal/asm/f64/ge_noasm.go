@@ -88,5 +88,4 @@ func GemvT(m, n uintptr, alpha float64, a []float64, lda uintptr, x []float64, i
 		AxpyInc(alpha*x[ix], a[lda*i:lda*i+n], y, n, 1, incY, 0, ky)
 		ix += incX
 	}
-
 }

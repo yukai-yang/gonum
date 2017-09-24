@@ -221,3 +221,78 @@ func gerData(m, n, incX, incY int) (x, y, a []float64) {
 	}
 	return x, y, a
 }
+
+//func BenchmarkBlasGemv(t *testing.B) {
+//	const name = "Dgemv %dx%d %v (%d %d)"
+//	for _, dims := range newIncSet(10, 30, 100, 300, 1e3, 3e3, 1e4, 3e4) {
+//		m, n := dims.x, dims.y
+//		if m/n >= 100 || n/m >= 100 {
+//			continue
+//		}
+//		for _, tr := range []blas.Transpose{blas.Trans, blas.NoTrans} {
+//			for _, inc := range newIncSet(1, 3, 10) {
+//				incX, incY := inc.x, inc.y
+//				t.Run(fmt.Sprintf(name, m, n, tr, incX, incY), func(b *testing.B) {
+//					for i := 0; i < t.N; i++ {
+//						testblas.DgemvBenchmark(b, dgemvWrap{}, tr, m, n, incX, incY)
+//					}
+//				})
+//			}
+//		}
+//	}
+//}
+//
+//func GemvNOld(m, n uintptr, alpha float64, a []float64, lda uintptr, x []float64, incX uintptr, beta float64, y []float64, incY uintptr) {
+//	var kx, ky, i uintptr
+//	if int(incX) < 0 {
+//		kx = uintptr(-int(n-1) * int(incX))
+//	}
+//	if int(incY) < 0 {
+//		ky = uintptr(-int(m-1) * int(incY))
+//	}
+//
+//	if incX == 1 && incY == 1 {
+//		for i = 0; i < m; i++ {
+//			y[i] = y[i]*beta + alpha*DotUnitary(a[lda*i:lda*i+n], x)
+//		}
+//		return
+//	}
+//	iy := ky
+//	for i = 0; i < m; i++ {
+//		y[iy] = y[iy]*beta + alpha*DotInc(x, a[lda*i:lda*i+n], n, incX, 1, kx, 0)
+//		iy += incY
+//	}
+//}
+//
+//func GemvTOld(m, n uintptr, alpha float64, a []float64, lda uintptr, x []float64, incX uintptr, beta float64, y []float64, incY uintptr) {
+//	var kx, ky, i uintptr
+//	if int(incX) < 0 {
+//		kx = uintptr(-int(m-1) * int(incX))
+//	}
+//	if int(incY) < 0 {
+//		ky = uintptr(-int(n-1) * int(incY))
+//		ScalInc(beta, y, n, uintptr(int(-incY)))
+//	} else if incY == 1 {
+//		ScalUnitary(beta, y)
+//	} else {
+//		ScalInc(beta, y, n, incY)
+//	}
+//
+//	if incX == 1 && incY == 1 {
+//		for i = 0; i < m; i++ {
+//			tmp := alpha * x[i]
+//			if tmp != 0 {
+//				AxpyUnitaryTo(y, tmp, a[lda*i:lda*i+n], y)
+//			}
+//		}
+//		return
+//	}
+//	ix := kx
+//	for i = 0; i < m; i++ {
+//		tmp := alpha * x[ix]
+//		if tmp != 0 {
+//			AxpyInc(tmp, a[lda*i:lda*i+n], y, n, 1, incY, 0, ky)
+//		}
+//		ix += incX
+//	}
+//}
