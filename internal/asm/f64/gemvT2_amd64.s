@@ -73,30 +73,30 @@
 	MOVHPD (Y_PTR)(INC_Y*1), X0
 
 #define KERNEL_4x4 \
-	MOVUPS (A_PTR), X4                \
-	MOVUPS 2*SIZE(A_PTR), X5          \
-	MOVUPS (A_PTR)(LDA*1), X6         \
-	MOVUPS 2*SIZE(A_PTR)(LDA*1), X7   \
-	MULPD  X8, X4                     \
-	MULPD  X8, X5                     \
-	MULPD  X9, X6                     \
-	MULPD  X9, X7                     \
-	ADDPD  X4, X0                     \
-	ADDPD  X5, X1                     \
-	ADDPD  X6, X0                     \
-	ADDPD  X7, X1                     \
-	MOVUPS (A_PTR)(LDA*2), X8         \
-	MOVUPS 2*SIZE(A_PTR)(LDA*2), X9   \
-	MOVUPS (A_PTR)(LDA3*1), X10       \
-	MOVUPS 2*SIZE(A_PTR)(LDA3*1), X11 \
-	MULPD  X10, X4                    \
-	MULPD  X10, X5                    \
-	MULPD  X11, X6                    \
-	MULPD  X11, X7                    \
-	ADDPD  X4, X0                     \
-	ADDPD  X5, X1                     \
-	ADDPD  X6, X0                     \
-	ADDPD  X7, X1                     \
+	MOVUPS (A_PTR), X4               \
+	MOVUPS 2*SIZE(A_PTR), X5         \
+	MOVUPS (A_PTR)(LDA*1), X6        \
+	MOVUPS 2*SIZE(A_PTR)(LDA*1), X7  \
+	MULPD  X8, X4                    \
+	MULPD  X8, X5                    \
+	MULPD  X9, X6                    \
+	MULPD  X9, X7                    \
+	ADDPD  X4, X0                    \
+	ADDPD  X5, X1                    \
+	ADDPD  X6, X0                    \
+	ADDPD  X7, X1                    \
+	MOVUPS (A_PTR)(LDA*2), X4        \
+	MOVUPS 2*SIZE(A_PTR)(LDA*2), X5  \
+	MOVUPS (A_PTR)(LDA3*1), X6       \
+	MOVUPS 2*SIZE(A_PTR)(LDA3*1), X7 \
+	MULPD  X10, X4                   \
+	MULPD  X10, X5                   \
+	MULPD  X11, X6                   \
+	MULPD  X11, X7                   \
+	ADDPD  X4, X0                    \
+	ADDPD  X5, X1                    \
+	ADDPD  X6, X0                    \
+	ADDPD  X7, X1                    \
 	ADDQ   $4*SIZE, A_PTR
 
 #define KERNEL_4x2 \
@@ -206,6 +206,60 @@
 	MOVSD X0, (Y_PTR)  \
 	ADDQ  $SIZE, A_PTR
 
+#define SCALE_8(PTR, SCAL) \
+	MOVUPS (PTR), X0   \
+	MOVUPS 16(PTR), X1 \
+	MOVUPS 32(PTR), X2 \
+	MOVUPS 48(PTR), X3 \
+	MULPD  SCAL, X0    \
+	MULPD  SCAL, X1    \
+	MULPD  SCAL, X2    \
+	MULPD  SCAL, X3    \
+	MOVUPS X0, (PTR)   \
+	MOVUPS X1, 16(PTR) \
+	MOVUPS X2, 32(PTR) \
+	MOVUPS X3, 48(PTR)
+
+#define SCALE_4(PTR, SCAL) \
+	MOVUPS (PTR), X0   \
+	MOVUPS 16(PTR), X1 \
+	MULPD  SCAL, X0    \
+	MULPD  SCAL, X1    \
+	MOVUPS X0, (PTR)   \
+	MOVUPS X1, 16(PTR) \
+
+#define SCALE_2(PTR, SCAL) \
+	MOVUPS (PTR), X0 \
+	MULPD  SCAL, X0  \
+	MOVUPS X0, (PTR) \
+
+#define SCALE_1(PTR, SCAL) \
+	MOVSD (PTR), X0 \
+	MULSD SCAL, X0  \
+	MOVSD X0, (PTR) \
+
+#define SCALEINC_4(PTR, INC, INC3, SCAL) \
+	MOVSD (PTR), X0         \
+	MOVSD (PTR)(INC*1), X1  \
+	MOVSD (PTR)(INC*2), X2  \
+	MOVSD (PTR)(INC3*1), X3 \
+	MULSD SCAL, X0          \
+	MULSD SCAL, X1          \
+	MULSD SCAL, X2          \
+	MULSD SCAL, X3          \
+	MOVSD X0, (PTR)         \
+	MOVSD X1, (PTR)(INC*1)  \
+	MOVSD X2, (PTR)(INC*2)  \
+	MOVSD X3, (PTR)(INC3*1)
+
+#define SCALEINC_2(PTR, INC, SCAL) \
+	MOVSD (PTR), X0        \
+	MOVSD (PTR)(INC*1), X1 \
+	MULSD SCAL, X0         \
+	MULSD SCAL, X1         \
+	MOVSD X0, (PTR)        \
+	MOVSD X1, (PTR)(INC*1)
+
 // func GemvT(m, n int,
 //	alpha float64,
 //	a []float64, lda int,
@@ -221,7 +275,6 @@ TEXT ·GemvT2(SB), NOSPLIT, $32-128
 	JE   end
 
 	MOVDDUP alpha+16(FP), ALPHA
-	MOVDDUP beta+88(FP), BETA
 
 	MOVQ x_base+56(FP), X_PTR
 	MOVQ y_base+96(FP), Y_PTR
@@ -250,6 +303,42 @@ TEXT ·GemvT2(SB), NOSPLIT, $32-128
 	CMPQ incY+120(FP), $1 // Check for dense vector Y (fast-path)
 	JNE  inc
 
+	MOVSD  $1.0, X0
+	COMISD beta+88(FP), X0
+	JE     gemv_start
+
+	MOVDDUP beta+88(FP), BETA
+	SHRQ    $3, M
+	JZ      scal4
+
+scal8:
+	SCALE_8(Y_PTR, BETA)
+	ADDQ $8*SIZE, Y_PTR
+	DECQ M
+	JNZ  scal8
+
+scal4:
+	TESTQ $4, M_DIM
+	JZ    scal2
+	SCALE_4(Y_PTR, BETA)
+	ADDQ  $4*SIZE, Y_PTR
+
+scal2:
+	TESTQ $2, M_DIM
+	JZ    scal1
+	SCALE_2(Y_PTR, BETA)
+	ADDQ  $2*SIZE, Y_PTR
+
+scal1:
+	TESTQ $1, M_DIM
+	JZ    scal_end
+	SCALE_1(Y_PTR, BETA)
+
+scal_end:
+	MOVQ Y, Y_PTR
+	MOVQ M_DIM, M
+
+gemv_start:
 	SHRQ $2, N
 	JZ   c2
 
@@ -404,10 +493,42 @@ inc:  // Alogrithm for incX > 0 ( split loads in kernel )
 	CMPQ    INC_Y, $0
 	CMOVQLT TMP1, TMP2
 	LEAQ    (Y_PTR)(TMP2*SIZE), Y_PTR
+	MOVQ    Y_PTR, Y
 
 	SHLQ $3, INC_Y
 	LEAQ (INC_Y)(INC_Y*2), INC3_Y // INC3_Y = INC_Y * 3
 
+	MOVSD  $1.0, X0
+	COMISD beta+88(FP), X0
+	JE     inc_gemv_start
+
+	MOVDDUP beta+88(FP), BETA
+	SHRQ    $2, M
+	JZ      inc_scal2
+
+inc_scal4:
+	SCALEINC_4(Y_PTR, INC_Y, INC3_Y, BETA)
+	LEAQ (Y_PTR)(INC_Y*4), Y_PTR
+	DECQ M
+	JNZ  inc_scal4
+
+inc_scal2:
+	TESTQ $2, M_DIM
+	JZ    inc_scal1
+
+	SCALEINC_2(Y_PTR, INC_Y, BETA)
+	LEAQ (Y_PTR)(INC_Y*2), Y_PTR
+
+inc_scal1:
+	TESTQ $1, M_DIM
+	JZ    inc_scal_end
+	SCALE_1(Y_PTR, BETA)
+
+inc_scal_end:
+	MOVQ Y, Y_PTR
+	MOVQ M_DIM, M
+
+inc_gemv_start:
 	SHRQ $2, N
 	JZ   inc_c2
 
@@ -427,7 +548,7 @@ inc_c4r4:
 
 	LEAQ (Y_PTR)(INC_Y*4), Y_PTR
 
-	DECQ N
+	DECQ M
 	JNZ  inc_c4r4
 
 inc_c4r2:
@@ -477,7 +598,7 @@ inc_c2r4:
 	STORE4_INC
 
 	LEAQ (Y_PTR)(INC_Y*4), Y_PTR
-	DECQ N
+	DECQ M
 	JNZ  inc_c2r4
 
 inc_c2r2:
