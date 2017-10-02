@@ -19,6 +19,7 @@
 #define X_PTR SI
 #define X x_base+56(FP)
 #define Y_PTR DX
+#define Y y_base+96(FP)
 #define A_ROW AX
 #define A_PTR DI
 
@@ -35,200 +36,229 @@
 #define BETA X14
 
 #define INIT4 \
-	XORPS X0, X0 \
-	XORPS X1, X1
+	MOVDDUP (X_PTR), X8            \
+	MOVDDUP (X_PTR)(INC_X*1), X9   \
+	MOVDDUP (X_PTR)(INC_X*2), X10  \
+	MOVDDUP (X_PTR)(INC3_X*1), X11 \
+	MULPD   ALPHA, X8              \
+	MULPD   ALPHA, X9              \
+	MULPD   ALPHA, X10             \
+	MULPD   ALPHA, X11
 
 #define INIT2 \
-	XORPS X0, X0
+	MOVDDUP (X_PTR), X8          \
+	MOVDDUP (X_PTR)(INC_X*1), X9 \
+	MULPD   ALPHA, X8            \
+	MULPD   ALPHA, X9
 
 #define INIT1 \
-	XORPS X0, X0
+	MOVDDUP (X_PTR), X8 \
+	MULPD   ALPHA, X8
 
 #define KERNEL_LOAD4 \
-	MOVDDUP (X_PTR), X10       \
-	MOVDDUP SIZE(X_PTR), X11   \
-	MOVDDUP 2*SIZE(X_PTR), X12 \
-	MOVDDUP 3*SIZE(X_PTR), X13
+	MOVUPS (Y_PTR), X0       \
+	MOVUPS 2*SIZE(Y_PTR), X1
 
 #define KERNEL_LOAD2 \
-	MOVDDUP (X_PTR), X10     \
-	MOVDDUP SIZE(X_PTR), X11
+	MOVUPS (Y_PTR), X0
 
 #define KERNEL_LOAD4_INC \
-	MOVDDUP (X_PTR), X10           \
-	MOVDDUP (X_PTR)(INC_X*1), X11  \
-	MOVDDUP (X_PTR)(INC_X*2), X12  \
-	MOVDDUP (X_PTR)(INC3_X*1), X13
+	MOVSD  (Y_PTR), X0           \
+	MOVHPD (Y_PTR)(INC_Y*1), X0  \
+	MOVSD  (Y_PTR)(INC_Y*2), X1  \
+	MOVHPD (Y_PTR)(INC3_Y*1), X1
 
 #define KERNEL_LOAD2_INC \
-	MOVDDUP (X_PTR), X10          \
-	MOVDDUP (X_PTR)(INC_X*1), X11
+	MOVSD  (Y_PTR), X0          \
+	MOVHPD (Y_PTR)(INC_Y*1), X0
 
 #define KERNEL_4x4 \
-	MOVUPS (A_PTR), X2               \
-	MOVUPS 2*SIZE(A_PTR), X3         \
-	MOVUPS (A_PTR)(LDA*1), X4        \
-	MOVUPS 2*SIZE(A_PTR)(LDA*1), X5  \
-	MOVUPS (A_PTR)(LDA*2), X6        \
-	MOVUPS 2*SIZE(A_PTR)(LDA*2), X7  \
-	MOVUPS (A_PTR)(LDA3*1), X8       \
-	MOVUPS 2*SIZE(A_PTR)(LDA3*1), X9 \
-	MULPD  X10, X2                   \
-	MULPD  X11, X4                   \
-	MULPD  X12, X6                   \
-	MULPD  X13, X8                   \
-	MULPD  X10, X3                   \
-	MULPD  X11, X5                   \
-	MULPD  X12, X7                   \
-	MULPD  X13, X9                   \
-	ADDPD  X2, X0                    \
-	ADDPD  X3, X1                    \
+	MOVUPS (A_PTR), X4               \
+	MOVUPS 2*SIZE(A_PTR), X5         \
+	MOVUPS (A_PTR)(LDA*1), X6        \
+	MOVUPS 2*SIZE(A_PTR)(LDA*1), X7  \
+	MULPD  X8, X4                    \
+	MULPD  X8, X5                    \
+	MULPD  X9, X6                    \
+	MULPD  X9, X7                    \
 	ADDPD  X4, X0                    \
 	ADDPD  X5, X1                    \
 	ADDPD  X6, X0                    \
 	ADDPD  X7, X1                    \
-	ADDPD  X8, X0                    \
-	ADDPD  X9, X1                    \
-	LEAQ   (A_PTR)(LDA*4), A_PTR
+	MOVUPS (A_PTR)(LDA*2), X4        \
+	MOVUPS 2*SIZE(A_PTR)(LDA*2), X5  \
+	MOVUPS (A_PTR)(LDA3*1), X6       \
+	MOVUPS 2*SIZE(A_PTR)(LDA3*1), X7 \
+	MULPD  X10, X4                   \
+	MULPD  X10, X5                   \
+	MULPD  X11, X6                   \
+	MULPD  X11, X7                   \
+	ADDPD  X4, X0                    \
+	ADDPD  X5, X1                    \
+	ADDPD  X6, X0                    \
+	ADDPD  X7, X1                    \
+	ADDQ   $4*SIZE, A_PTR
 
 #define KERNEL_4x2 \
 	MOVUPS (A_PTR), X4              \
 	MOVUPS 2*SIZE(A_PTR), X5        \
 	MOVUPS (A_PTR)(LDA*1), X6       \
 	MOVUPS 2*SIZE(A_PTR)(LDA*1), X7 \
-	MULPD  X10, X4                  \
-	MULPD  X10, X5                  \
-	MULPD  X11, X6                  \
-	MULPD  X11, X7                  \
+	MULPD  X8, X4                   \
+	MULPD  X8, X5                   \
+	MULPD  X9, X6                   \
+	MULPD  X9, X7                   \
 	ADDPD  X4, X0                   \
 	ADDPD  X5, X1                   \
 	ADDPD  X6, X0                   \
 	ADDPD  X7, X1                   \
-	LEAQ   (A_PTR)(LDA*2), A_PTR
+	ADDQ   $4*SIZE, A_PTR
 
 #define KERNEL_4x1 \
-	MOVDDUP (X_PTR), X12      \
-	MOVUPS  (A_PTR), X4       \
-	MOVUPS  2*SIZE(A_PTR), X5 \
-	MULPD   X12, X4           \
-	MULPD   X12, X5           \
-	ADDPD   X4, X0            \
-	ADDPD   X5, X1            \
-	ADDQ    LDA, A_PTR
+	MOVUPS (A_PTR), X4       \
+	MOVUPS 2*SIZE(A_PTR), X5 \
+	MULPD  X8, X4            \
+	MULPD  X8, X5            \
+	ADDPD  X4, X0            \
+	ADDPD  X5, X1            \
+	ADDQ   $4*SIZE, A_PTR
 
 #define STORE4 \
-	MOVUPS (Y_PTR), X4       \
-	MOVUPS 2*SIZE(Y_PTR), X5 \
-	MULPD  ALPHA, X0         \
-	MULPD  ALPHA, X1         \
-	MULPD  BETA, X4          \
-	MULPD  BETA, X5          \
-	ADDPD  X0, X4            \
-	ADDPD  X1, X5            \
-	MOVUPS X4, (Y_PTR)       \
-	MOVUPS X5, 2*SIZE(Y_PTR)
+	MOVUPS X0, (Y_PTR)       \
+	MOVUPS X1, 2*SIZE(Y_PTR)
 
 #define STORE4_INC \
-	MOVSD  (Y_PTR), X4           \
-	MOVHPD (Y_PTR)(INC_Y*1), X4  \
-	MOVSD  (Y_PTR)(INC_Y*2), X5  \
-	MOVHPD (Y_PTR)(INC3_Y*1), X5 \
-	MULPD  ALPHA, X0             \
-	MULPD  ALPHA, X1             \
-	MULPD  BETA, X4              \
-	MULPD  BETA, X5              \
-	ADDPD  X0, X4                \
-	ADDPD  X1, X5                \
-	MOVLPD X4, (Y_PTR)           \
-	MOVHPD X4, (Y_PTR)(INC_Y*1)  \
-	MOVLPD X5, (Y_PTR)(INC_Y*2)  \
-	MOVHPD X5, (Y_PTR)(INC3_Y*1)
+	MOVLPD X0, (Y_PTR)           \
+	MOVHPD X0, (Y_PTR)(INC_Y*1)  \
+	MOVLPD X1, (Y_PTR)(INC_Y*2)  \
+	MOVHPD X1, (Y_PTR)(INC3_Y*1)
 
 #define KERNEL_2x4 \
-	MOVUPS (A_PTR), X6           \
-	MOVUPS (A_PTR)(LDA*1), X7    \
-	MOVUPS (A_PTR)(LDA*2), X8    \
-	MOVUPS (A_PTR)(LDA3*1), X9   \
-	MULPD  X10, X6               \
-	MULPD  X11, X7               \
-	MULPD  X12, X8               \
-	MULPD  X13, X9               \
-	ADDPD  X6, X0                \
-	ADDPD  X7, X0                \
-	ADDPD  X8, X0                \
-	ADDPD  X9, X0                \
-	LEAQ   (A_PTR)(LDA*4), A_PTR
+	MOVUPS (A_PTR), X4         \
+	MOVUPS (A_PTR)(LDA*1), X5  \
+	MOVUPS (A_PTR)(LDA*2), X6  \
+	MOVUPS (A_PTR)(LDA3*1), X7 \
+	MULPD  X8, X4              \
+	MULPD  X9, X5              \
+	MULPD  X10, X6             \
+	MULPD  X11, X7             \
+	ADDPD  X4, X0              \
+	ADDPD  X5, X0              \
+	ADDPD  X6, X0              \
+	ADDPD  X7, X0              \
+	ADDQ   $2*SIZE, A_PTR
 
 #define KERNEL_2x2 \
-	MOVUPS (A_PTR), X8           \
-	MOVUPS (A_PTR)(LDA*1), X9    \
-	MULPD  X10, X8               \
-	MULPD  X11, X9               \
-	ADDPD  X8, X0                \
-	ADDPD  X9, X0                \
-	LEAQ   (A_PTR)(LDA*2), A_PTR
+	MOVUPS (A_PTR), X4        \
+	MOVUPS (A_PTR)(LDA*1), X5 \
+	MULPD  X8, X4             \
+	MULPD  X9, X5             \
+	ADDPD  X4, X0             \
+	ADDPD  X5, X0             \
+	ADDQ   $2*SIZE, A_PTR
 
 #define KERNEL_2x1 \
-	MOVDDUP (X_PTR), X12 \
-	MOVUPS  (A_PTR), X8  \
-	MULPD   X12, X8      \
-	ADDPD   X8, X0       \
-	ADDQ    LDA, A_PTR
+	MOVUPS (A_PTR), X4    \
+	MULPD  X8, X4         \
+	ADDPD  X4, X0         \
+	ADDQ   $2*SIZE, A_PTR
 
 #define STORE2 \
-	MOVUPS (Y_PTR), X4 \
-	MULPD  ALPHA, X0   \
-	MULPD  BETA, X4    \
-	ADDPD  X0, X4      \
-	MOVUPS X4, (Y_PTR)
+	MOVUPS X0, (Y_PTR)
 
 #define STORE2_INC \
-	MOVSD  (Y_PTR), X4          \
-	MOVHPD (Y_PTR)(INC_Y*1), X4 \
-	MULPD  ALPHA, X0            \
-	MULPD  BETA, X4             \
-	ADDPD  X0, X4               \
-	MOVSD  X4, (Y_PTR)          \
-	MOVHPD X4, (Y_PTR)(INC_Y*1)
+	MOVLPD X0, (Y_PTR)          \
+	MOVHPD X0, (Y_PTR)(INC_Y*1)
 
 #define KERNEL_1x4 \
-	MOVSD (A_PTR), X4           \
-	MOVSD (A_PTR)(LDA*1), X5    \
-	MOVSD (A_PTR)(LDA*2), X6    \
-	MOVSD (A_PTR)(LDA3*1), X7   \
-	MULSD X10, X4               \
-	MULSD X11, X5               \
-	MULSD X12, X6               \
-	MULSD X13, X7               \
-	ADDSD X4, X5                \
-	ADDSD X6, X7                \
-	ADDSD X5, X0                \
-	ADDSD X7, X0                \
-	LEAQ  (A_PTR)(LDA*4), A_PTR
+	MOVSD (Y_PTR), X0         \
+	MOVSD (A_PTR), X4         \
+	MOVSD (A_PTR)(LDA*1), X5  \
+	MOVSD (A_PTR)(LDA*2), X6  \
+	MOVSD (A_PTR)(LDA3*1), X7 \
+	MULSD X8, X4              \
+	MULSD X9, X5              \
+	MULSD X10, X6             \
+	MULSD X11, X7             \
+	ADDSD X4, X0              \
+	ADDSD X5, X0              \
+	ADDSD X6, X0              \
+	ADDSD X7, X0              \
+	MOVSD X0, (Y_PTR)         \
+	ADDQ  $SIZE, A_PTR
 
 #define KERNEL_1x2 \
-	MOVSD (A_PTR), X8           \
-	MOVSD (A_PTR)(LDA*1), X9    \
-	MULSD X10, X8               \
-	MULSD X11, X9               \
-	ADDPD X8, X0                \
-	ADDPD X9, X0                \
-	LEAQ  (A_PTR)(LDA*2), A_PTR
+	MOVSD (Y_PTR), X0        \
+	MOVSD (A_PTR), X4        \
+	MOVSD (A_PTR)(LDA*1), X5 \
+	MULSD X8, X4             \
+	MULSD X9, X5             \
+	ADDSD X4, X0             \
+	ADDSD X5, X0             \
+	MOVSD X0, (Y_PTR)        \
+	ADDQ  $SIZE, A_PTR
 
 #define KERNEL_1x1 \
-	MOVSD (X_PTR), X12 \
-	MOVSD (A_PTR), X8  \
-	MULSD X12, X8      \
-	ADDSD X8, X0       \
-	ADDQ  LDA, A_PTR
+	MOVSD (Y_PTR), X0  \
+	MOVSD (A_PTR), X4  \
+	MULSD X8, X4       \
+	ADDSD X4, X0       \
+	MOVSD X0, (Y_PTR)  \
+	ADDQ  $SIZE, A_PTR
 
-#define STORE1 \
-	HADDPD X0, X0      \
-	MOVSD  (Y_PTR), X4 \
-	MULSD  ALPHA, X0   \
-	MULSD  BETA, X4    \
-	ADDSD  X0, X4      \
-	MOVSD  X4, (Y_PTR)
+#define SCALE_8(PTR, SCAL) \
+	MOVUPS (PTR), X0   \
+	MOVUPS 16(PTR), X1 \
+	MOVUPS 32(PTR), X2 \
+	MOVUPS 48(PTR), X3 \
+	MULPD  SCAL, X0    \
+	MULPD  SCAL, X1    \
+	MULPD  SCAL, X2    \
+	MULPD  SCAL, X3    \
+	MOVUPS X0, (PTR)   \
+	MOVUPS X1, 16(PTR) \
+	MOVUPS X2, 32(PTR) \
+	MOVUPS X3, 48(PTR)
+
+#define SCALE_4(PTR, SCAL) \
+	MOVUPS (PTR), X0   \
+	MOVUPS 16(PTR), X1 \
+	MULPD  SCAL, X0    \
+	MULPD  SCAL, X1    \
+	MOVUPS X0, (PTR)   \
+	MOVUPS X1, 16(PTR) \
+
+#define SCALE_2(PTR, SCAL) \
+	MOVUPS (PTR), X0 \
+	MULPD  SCAL, X0  \
+	MOVUPS X0, (PTR) \
+
+#define SCALE_1(PTR, SCAL) \
+	MOVSD (PTR), X0 \
+	MULSD SCAL, X0  \
+	MOVSD X0, (PTR) \
+
+#define SCALEINC_4(PTR, INC, INC3, SCAL) \
+	MOVSD (PTR), X0         \
+	MOVSD (PTR)(INC*1), X1  \
+	MOVSD (PTR)(INC*2), X2  \
+	MOVSD (PTR)(INC3*1), X3 \
+	MULSD SCAL, X0          \
+	MULSD SCAL, X1          \
+	MULSD SCAL, X2          \
+	MULSD SCAL, X3          \
+	MOVSD X0, (PTR)         \
+	MOVSD X1, (PTR)(INC*1)  \
+	MOVSD X2, (PTR)(INC*2)  \
+	MOVSD X3, (PTR)(INC3*1)
+
+#define SCALEINC_2(PTR, INC, SCAL) \
+	MOVSD (PTR), X0        \
+	MOVSD (PTR)(INC*1), X1 \
+	MULSD SCAL, X0         \
+	MULSD SCAL, X1         \
+	MOVSD X0, (PTR)        \
+	MOVSD X1, (PTR)(INC*1)
 
 // func GemvT(m, n int,
 //	alpha float64,
@@ -245,7 +275,6 @@ TEXT ·GemvT(SB), NOSPLIT, $32-128
 	JE   end
 
 	MOVDDUP alpha+16(FP), ALPHA
-	MOVDDUP beta+88(FP), BETA
 
 	MOVQ x_base+56(FP), X_PTR
 	MOVQ y_base+96(FP), Y_PTR
@@ -255,187 +284,6 @@ TEXT ·GemvT(SB), NOSPLIT, $32-128
 	SHLQ $3, LDA
 	LEAQ (LDA)(LDA*2), LDA3   // LDA3 = LDA * 3
 	MOVQ A_ROW, A_PTR
-
-	XORQ    TMP2, TMP2
-	MOVQ    M, TMP1
-	SUBQ    $1, TMP1
-	IMULQ   INC_Y, TMP1
-	NEGQ    TMP1
-	CMPQ    INC_Y, $0
-	CMOVQLT TMP1, TMP2
-	LEAQ    (Y_PTR)(TMP2*SIZE), Y_PTR
-
-	SHLQ $3, INC_Y
-	LEAQ (INC_Y)(INC_Y*2), INC3_Y // INC3_Y = INC_Y * 3
-
-	CMPQ incX+80(FP), $1 // Check for dense vector X (fast-path)
-	JNE  inc
-
-	SHRQ $2, M
-	JZ   r2
-
-r4:
-	// LOAD 4
-	INIT4
-
-	MOVQ N_DIM, N
-	SHRQ $2, N
-	JZ   r4c2
-
-r4c4:
-	// 4x4 KERNEL
-	KERNEL_LOAD4
-	KERNEL_4x4
-
-	ADDQ $4*SIZE, X_PTR
-
-	DECQ N
-	JNZ  r4c4
-
-r4c2:
-	TESTQ $2, N_DIM
-	JZ    r4c1
-
-	// 4x2 KERNEL
-	KERNEL_LOAD2
-	KERNEL_4x2
-
-	ADDQ $2*SIZE, X_PTR
-
-r4c1:
-	TESTQ $1, N_DIM
-	JZ    r4end
-
-	// 4x1 KERNEL
-	KERNEL_4x1
-
-	ADDQ $SIZE, X_PTR
-
-r4end:
-	CMPQ INC_Y, $SIZE
-	JNZ  r4st_inc
-
-	STORE4
-	ADDQ $4*SIZE, Y_PTR
-	JMP  r4inc
-
-r4st_inc:
-	STORE4_INC
-	LEAQ (Y_PTR)(INC_Y*4), Y_PTR
-
-r4inc:
-	MOVQ X, X_PTR
-	ADDQ $4*SIZE, A_ROW
-	MOVQ A_ROW, A_PTR
-
-	DECQ M
-	JNZ  r4
-
-r2:
-	TESTQ $2, M_DIM
-	JZ    r1
-
-	// LOAD 2
-	INIT2
-
-	MOVQ N_DIM, N
-	SHRQ $2, N
-	JZ   r2c2
-
-r2c4:
-	// 2x4 KERNEL
-	KERNEL_LOAD4
-	KERNEL_2x4
-
-	ADDQ $4*SIZE, X_PTR
-
-	DECQ N
-	JNZ  r2c4
-
-r2c2:
-	TESTQ $2, N_DIM
-	JZ    r2c1
-
-	// 2x2 KERNEL
-	KERNEL_LOAD2
-	KERNEL_2x2
-
-	ADDQ $2*SIZE, X_PTR
-
-r2c1:
-	TESTQ $1, N_DIM
-	JZ    r2end
-
-	// 2x1 KERNEL
-	KERNEL_2x1
-
-	ADDQ $SIZE, X_PTR
-
-r2end:
-	CMPQ INC_Y, $SIZE
-	JNE  r2st_inc
-
-	STORE2
-	ADDQ $2*SIZE, Y_PTR
-	JMP  r2inc
-
-r2st_inc:
-	STORE2_INC
-	LEAQ (Y_PTR)(INC_Y*2), Y_PTR
-
-r2inc:
-
-	MOVQ X, X_PTR
-	ADDQ $2*SIZE, A_ROW
-	MOVQ A_ROW, A_PTR
-
-r1:
-	TESTQ $1, M_DIM
-	JZ    end
-
-	// LOAD 1
-	INIT1
-
-	MOVQ N_DIM, N
-	SHRQ $2, N
-	JZ   r1c2
-
-r1c4:
-	// 1x4 KERNEL
-	KERNEL_LOAD4
-	KERNEL_1x4
-
-	ADDQ $4*SIZE, X_PTR
-
-	DECQ N
-	JNZ  r1c4
-
-r1c2:
-	TESTQ $2, N_DIM
-	JZ    r1c1
-
-	// 1x2 KERNEL
-	KERNEL_LOAD2
-	KERNEL_1x2
-
-	ADDQ $2*SIZE, X_PTR
-
-r1c1:
-	TESTQ $1, N_DIM
-	JZ    end
-
-	// 1x1 KERNEL
-	KERNEL_1x1
-
-	ADDQ $SIZE, X_PTR
-
-r1end:
-	STORE1
-
-end:
-	RET
-
-inc:  // Alogrithm for incX > 0 ( split loads in kernel )
 
 	MOVQ incX+80(FP), INC_X // INC_X = incX * sizeof(float64)
 
@@ -452,165 +300,373 @@ inc:  // Alogrithm for incX > 0 ( split loads in kernel )
 	SHLQ $3, INC_X
 	LEAQ (INC_X)(INC_X*2), INC3_X // INC3_X = INC_X * 3
 
-tmp:
+	CMPQ incY+120(FP), $1 // Check for dense vector Y (fast-path)
+	JNE  inc
 
-	SHRQ $2, M
-	JZ   inc_r2
+	MOVSD  $1.0, X0
+	COMISD beta+88(FP), X0
+	JE     gemv_start
 
-inc_r4:
+	MOVDDUP beta+88(FP), BETA
+	SHRQ    $3, M
+	JZ      scal4
+
+scal8:
+	SCALE_8(Y_PTR, BETA)
+	ADDQ $8*SIZE, Y_PTR
+	DECQ M
+	JNZ  scal8
+
+scal4:
+	TESTQ $4, M_DIM
+	JZ    scal2
+	SCALE_4(Y_PTR, BETA)
+	ADDQ  $4*SIZE, Y_PTR
+
+scal2:
+	TESTQ $2, M_DIM
+	JZ    scal1
+	SCALE_2(Y_PTR, BETA)
+	ADDQ  $2*SIZE, Y_PTR
+
+scal1:
+	TESTQ $1, M_DIM
+	JZ    scal_end
+	SCALE_1(Y_PTR, BETA)
+
+scal_end:
+	MOVQ Y, Y_PTR
+	MOVQ M_DIM, M
+
+gemv_start:
+	SHRQ $2, N
+	JZ   c2
+
+c4:
 	// LOAD 4
 	INIT4
 
-	MOVQ N_DIM, N
-	SHRQ $2, N
-	JZ   inc_r4c2
+	MOVQ M_DIM, M
+	SHRQ $2, M
+	JZ   c4r2
 
-inc_r4c4:
+c4r4:
 	// 4x4 KERNEL
-	KERNEL_LOAD4_INC
+	KERNEL_LOAD4
 	KERNEL_4x4
-
-	LEAQ (X_PTR)(INC_X*4), X_PTR
-
-	DECQ N
-	JNZ  inc_r4c4
-
-inc_r4c2:
-	TESTQ $2, N_DIM
-	JZ    inc_r4c1
-
-	// 4x2 KERNEL
-	KERNEL_LOAD2_INC
-	KERNEL_4x2
-
-	LEAQ (X_PTR)(INC_X*2), X_PTR
-
-inc_r4c1:
-	TESTQ $1, N_DIM
-	JZ    inc_r4end
-
-	// 4x1 KERNEL
-	KERNEL_4x1
-
-	ADDQ INC_X, X_PTR
-
-inc_r4end:
-	CMPQ INC_Y, $SIZE
-	JNE  inc_r4st_inc
-
 	STORE4
+
 	ADDQ $4*SIZE, Y_PTR
-	JMP  inc_r4inc
-
-inc_r4st_inc:
-	STORE4_INC
-	LEAQ (Y_PTR)(INC_Y*4), Y_PTR
-
-inc_r4inc:
-	MOVQ X, X_PTR
-	ADDQ $4*SIZE, A_ROW
-	MOVQ A_ROW, A_PTR
 
 	DECQ M
-	JNZ  inc_r4
+	JNZ  c4r4
 
-inc_r2:
+c4r2:
 	TESTQ $2, M_DIM
-	JZ    inc_r1
+	JZ    c4r1
+
+	// 4x2 KERNEL
+	KERNEL_LOAD2
+	KERNEL_2x4
+	STORE2
+
+	ADDQ $2*SIZE, Y_PTR
+
+c4r1:
+	TESTQ $1, M_DIM
+	JZ    c4end
+
+	// 4x1 KERNEL
+	KERNEL_1x4
+
+	ADDQ $SIZE, Y_PTR
+
+c4end:
+	LEAQ (X_PTR)(INC_X*4), X_PTR
+	MOVQ Y, Y_PTR
+	LEAQ (A_ROW)(LDA*4), A_ROW
+	MOVQ A_ROW, A_PTR
+
+	DECQ N
+	JNZ  c4
+
+c2:
+	TESTQ $2, N_DIM
+	JZ    c1
 
 	// LOAD 2
 	INIT2
 
-	MOVQ N_DIM, N
-	SHRQ $2, N
-	JZ   inc_r2c2
+	MOVQ M_DIM, M
+	SHRQ $2, M
+	JZ   c2r2
 
-inc_r2c4:
+c2r4:
 	// 2x4 KERNEL
-	KERNEL_LOAD4_INC
-	KERNEL_2x4
+	KERNEL_LOAD4
+	KERNEL_4x2
+	STORE4
 
-	LEAQ (X_PTR)(INC_X*4), X_PTR
-	DECQ N
-	JNZ  inc_r2c4
+	ADDQ $4*SIZE, Y_PTR
 
-inc_r2c2:
-	TESTQ $2, N_DIM
-	JZ    inc_r2c1
+	DECQ M
+	JNZ  c2r4
+
+c2r2:
+	TESTQ $2, M_DIM
+	JZ    c2r1
 
 	// 2x2 KERNEL
-	KERNEL_LOAD2_INC
+	KERNEL_LOAD2
 	KERNEL_2x2
+	STORE2
 
-	LEAQ (X_PTR)(INC_X*2), X_PTR
+	ADDQ $2*SIZE, Y_PTR
 
-inc_r2c1:
-	TESTQ $1, N_DIM
-	JZ    inc_r2end
+c2r1:
+	TESTQ $1, M_DIM
+	JZ    c2end
 
 	// 2x1 KERNEL
-	KERNEL_2x1
+	KERNEL_1x2
 
-	ADDQ INC_X, X_PTR
+	ADDQ $SIZE, Y_PTR
 
-inc_r2end:
-	CMPQ INC_Y, $SIZE
-	JNE  inc_r2st_inc
-
-	STORE2
-	ADDQ $2*SIZE, Y_PTR
-	JMP  inc_r2inc
-
-inc_r2st_inc:
-	STORE2_INC
-	LEAQ (Y_PTR)(INC_Y*2), Y_PTR
-
-inc_r2inc:
-	MOVQ X, X_PTR
-	ADDQ $2*SIZE, A_ROW
+c2end:
+	LEAQ (X_PTR)(INC_X*2), X_PTR
+	MOVQ Y, Y_PTR
+	LEAQ (A_ROW)(LDA*2), A_ROW
 	MOVQ A_ROW, A_PTR
 
-inc_r1:
-	TESTQ $1, M_DIM
+c1:
+	TESTQ $1, N_DIM
 	JZ    end
 
 	// LOAD 1
 	INIT1
 
-	MOVQ N_DIM, N
-	SHRQ $2, N
-	JZ   inc_r1c2
+	MOVQ M_DIM, M
+	SHRQ $2, M
+	JZ   c1r2
 
-inc_r1c4:
+c1r4:
 	// 1x4 KERNEL
-	KERNEL_LOAD4_INC
-	KERNEL_1x4
+	KERNEL_LOAD4
+	KERNEL_4x1
+	STORE4
 
-	LEAQ (X_PTR)(INC_X*4), X_PTR
-	DECQ N
-	JNZ  inc_r1c4
+	ADDQ $4*SIZE, Y_PTR
 
-inc_r1c2:
-	TESTQ $2, N_DIM
-	JZ    inc_r1c1
+	DECQ M
+	JNZ  c1r4
+
+c1r2:
+	TESTQ $2, M_DIM
+	JZ    c1r1
 
 	// 1x2 KERNEL
-	KERNEL_LOAD2_INC
-	KERNEL_1x2
+	KERNEL_LOAD2
+	KERNEL_2x1
+	STORE2
 
-	LEAQ (X_PTR)(INC_X*2), X_PTR
+	ADDQ $2*SIZE, Y_PTR
 
-inc_r1c1:
-	TESTQ $1, N_DIM
+c1r1:
+	TESTQ $1, M_DIM
 	JZ    end
 
 	// 1x1 KERNEL
 	KERNEL_1x1
 
-	ADDQ INC_X, X_PTR
+	ADDQ $SIZE, Y_PTR
 
-inc_r1end:
-	STORE1
+end:
+	RET
+
+inc:  // Alogrithm for incX > 0 ( split loads in kernel )
+
+	XORQ    TMP2, TMP2
+	MOVQ    M, TMP1
+	SUBQ    $1, TMP1
+	IMULQ   INC_Y, TMP1
+	NEGQ    TMP1
+	CMPQ    INC_Y, $0
+	CMOVQLT TMP1, TMP2
+	LEAQ    (Y_PTR)(TMP2*SIZE), Y_PTR
+	MOVQ    Y_PTR, Y
+
+	SHLQ $3, INC_Y
+	LEAQ (INC_Y)(INC_Y*2), INC3_Y // INC3_Y = INC_Y * 3
+
+	MOVSD  $1.0, X0
+	COMISD beta+88(FP), X0
+	JE     inc_gemv_start
+
+	MOVDDUP beta+88(FP), BETA
+	SHRQ    $2, M
+	JZ      inc_scal2
+
+inc_scal4:
+	SCALEINC_4(Y_PTR, INC_Y, INC3_Y, BETA)
+	LEAQ (Y_PTR)(INC_Y*4), Y_PTR
+	DECQ M
+	JNZ  inc_scal4
+
+inc_scal2:
+	TESTQ $2, M_DIM
+	JZ    inc_scal1
+
+	SCALEINC_2(Y_PTR, INC_Y, BETA)
+	LEAQ (Y_PTR)(INC_Y*2), Y_PTR
+
+inc_scal1:
+	TESTQ $1, M_DIM
+	JZ    inc_scal_end
+	SCALE_1(Y_PTR, BETA)
+
+inc_scal_end:
+	MOVQ Y, Y_PTR
+	MOVQ M_DIM, M
+
+inc_gemv_start:
+	SHRQ $2, N
+	JZ   inc_c2
+
+inc_c4:
+	// LOAD 4
+	INIT4
+
+	MOVQ M_DIM, M
+	SHRQ $2, M
+	JZ   inc_c4r2
+
+inc_c4r4:
+	// 4x4 KERNEL
+	KERNEL_LOAD4_INC
+	KERNEL_4x4
+	STORE4_INC
+
+	LEAQ (Y_PTR)(INC_Y*4), Y_PTR
+
+	DECQ M
+	JNZ  inc_c4r4
+
+inc_c4r2:
+	TESTQ $2, M_DIM
+	JZ    inc_c4r1
+
+	// 4x2 KERNEL
+	KERNEL_LOAD2_INC
+	KERNEL_2x4
+	STORE2_INC
+
+	LEAQ (Y_PTR)(INC_Y*2), Y_PTR
+
+inc_c4r1:
+	TESTQ $1, M_DIM
+	JZ    inc_c4end
+
+	// 4x1 KERNEL
+	KERNEL_1x4
+
+	ADDQ INC_Y, Y_PTR
+
+inc_c4end:
+	LEAQ (X_PTR)(INC_X*4), X_PTR
+	MOVQ Y, Y_PTR
+	LEAQ (A_ROW)(LDA*4), A_ROW
+	MOVQ A_ROW, A_PTR
+
+	DECQ N
+	JNZ  inc_c4
+
+inc_c2:
+	TESTQ $2, N_DIM
+	JZ    inc_c1
+
+	// LOAD 2
+	INIT2
+
+	MOVQ M_DIM, M
+	SHRQ $2, M
+	JZ   inc_c2r2
+
+inc_c2r4:
+	// 2x4 KERNEL
+	KERNEL_LOAD4_INC
+	KERNEL_4x2
+	STORE4_INC
+
+	LEAQ (Y_PTR)(INC_Y*4), Y_PTR
+	DECQ M
+	JNZ  inc_c2r4
+
+inc_c2r2:
+	TESTQ $2, M_DIM
+	JZ    inc_c2r1
+
+	// 2x2 KERNEL
+	KERNEL_LOAD2_INC
+	KERNEL_2x2
+	STORE2_INC
+
+	LEAQ (Y_PTR)(INC_Y*2), Y_PTR
+
+inc_c2r1:
+	TESTQ $1, M_DIM
+	JZ    inc_c2end
+
+	// 2x1 KERNEL
+	KERNEL_1x2
+
+	ADDQ INC_Y, Y_PTR
+
+inc_c2end:
+	LEAQ (X_PTR)(INC_X*2), X_PTR
+	MOVQ Y, Y_PTR
+	LEAQ (A_ROW)(LDA*2), A_ROW
+	MOVQ A_ROW, A_PTR
+
+inc_c1:
+	TESTQ $1, N_DIM
+	JZ    end
+
+	// LOAD 1
+	INIT1
+
+	MOVQ M_DIM, M
+	SHRQ $2, M
+	JZ   inc_c1r2
+
+inc_c1r4:
+	// 1x4 KERNEL
+	KERNEL_LOAD4_INC
+	KERNEL_4x1
+	STORE4_INC
+
+	LEAQ (Y_PTR)(INC_Y*4), Y_PTR
+	DECQ M
+	JNZ  inc_c1r4
+
+inc_c1r2:
+	TESTQ $2, M_DIM
+	JZ    inc_c1r1
+
+	// 1x2 KERNEL
+	KERNEL_LOAD2_INC
+	KERNEL_2x1
+	STORE2_INC
+
+	LEAQ (Y_PTR)(INC_Y*2), Y_PTR
+
+inc_c1r1:
+	TESTQ $1, M_DIM
+	JZ    inc_end
+
+	// 1x1 KERNEL
+	KERNEL_1x1
+
+	ADDQ INC_Y, Y_PTR
 
 inc_end:
 	RET
