@@ -57,62 +57,25 @@ func (Implementation) Dgemv(tA blas.Transpose, m, n int, alpha float64, a []floa
 		return
 	}
 
-	var kx, ky int
-	if incX > 0 {
-		kx = 0
-	} else {
-		kx = -(lenX - 1) * incX
-	}
-	if incY > 0 {
-		ky = 0
-	} else {
-		ky = -(lenY - 1) * incY
-	}
-
-	// First form y := beta * y
-	if incY > 0 {
-		Implementation{}.Dscal(lenY, beta, y, incY)
-	} else {
-		Implementation{}.Dscal(lenY, beta, y, -incY)
-	}
-
 	if alpha == 0 {
+		// First form y := beta * y
+		if incY > 0 {
+			Implementation{}.Dscal(lenY, beta, y, incY)
+		} else {
+			Implementation{}.Dscal(lenY, beta, y, -incY)
+		}
 		return
 	}
-
 	// Form y := alpha * A * x + y
 	if tA == blas.NoTrans {
-		if incX == 1 && incY == 1 {
-			for i := 0; i < m; i++ {
-				y[i] += alpha * f64.DotUnitary(a[lda*i:lda*i+n], x)
-			}
-			return
-		}
-		iy := ky
-		for i := 0; i < m; i++ {
-			y[iy] += alpha * f64.DotInc(x, a[lda*i:lda*i+n], uintptr(n), uintptr(incX), 1, uintptr(kx), 0)
-			iy += incY
-		}
+		f64.GemvN(uintptr(m), uintptr(n), alpha,
+			a, uintptr(lda), x, uintptr(incX),
+			beta, y, uintptr(incY))
 		return
 	}
-	// Cases where a is transposed.
-	if incX == 1 && incY == 1 {
-		for i := 0; i < m; i++ {
-			tmp := alpha * x[i]
-			if tmp != 0 {
-				f64.AxpyUnitaryTo(y, tmp, a[lda*i:lda*i+n], y)
-			}
-		}
-		return
-	}
-	ix := kx
-	for i := 0; i < m; i++ {
-		tmp := alpha * x[ix]
-		if tmp != 0 {
-			f64.AxpyInc(tmp, a[lda*i:lda*i+n], y, uintptr(n), 1, uintptr(incY), 0, uintptr(ky))
-		}
-		ix += incX
-	}
+	f64.GemvT(uintptr(m), uintptr(n), alpha,
+		a, uintptr(lda), x, uintptr(incX),
+		beta, y, uintptr(incY))
 }
 
 // Dger performs the rank-one operation
