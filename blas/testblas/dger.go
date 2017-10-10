@@ -20,7 +20,7 @@ func DgerTest(t *testing.T, blasser Dgerer) {
 		incX int
 		incY int
 
-		trueAns [][]float64
+		want [][]float64
 	}{
 		{
 			name: "M gt N inc 1",
@@ -33,11 +33,11 @@ func DgerTest(t *testing.T, blasser Dgerer) {
 				{8, 9, -10},
 				{-12, -14, -6},
 			},
-			x:       []float64{-2, -3, 0, 1, 2},
-			y:       []float64{-1.1, 5, 0},
-			incX:    1,
-			incY:    1,
-			trueAns: [][]float64{{3.5, -7.6, 3.5}, {5.9, -12.2, 3.3}, {-1.3, -4.3, -9.7}, {6.9, 14, -10}, {-14.2, -4, -6}},
+			x:    []float64{-2, -3, 0, 1, 2},
+			y:    []float64{-1.1, 5, 0},
+			incX: 1,
+			incY: 1,
+			want: [][]float64{{3.5, -7.6, 3.5}, {5.9, -12.2, 3.3}, {-1.3, -4.3, -9.7}, {6.9, 14, -10}, {-14.2, -4, -6}},
 		},
 		{
 			name: "M eq N inc 1",
@@ -48,11 +48,11 @@ func DgerTest(t *testing.T, blasser Dgerer) {
 				{2.6, 2.8, 3.3},
 				{-1.3, -4.3, -9.7},
 			},
-			x:       []float64{-2, -3, 0},
-			y:       []float64{-1.1, 5, 0},
-			incX:    1,
-			incY:    1,
-			trueAns: [][]float64{{3.5, -7.6, 3.5}, {5.9, -12.2, 3.3}, {-1.3, -4.3, -9.7}},
+			x:    []float64{-2, -3, 0},
+			y:    []float64{-1.1, 5, 0},
+			incX: 1,
+			incY: 1,
+			want: [][]float64{{3.5, -7.6, 3.5}, {5.9, -12.2, 3.3}, {-1.3, -4.3, -9.7}},
 		},
 
 		{
@@ -64,11 +64,11 @@ func DgerTest(t *testing.T, blasser Dgerer) {
 				{2.6, 2.8, 3.3, -3.4, 6.2, -8.7},
 				{-1.3, -4.3, -9.7, -3.1, 8.9, 8.9},
 			},
-			x:       []float64{-2, -3, 0},
-			y:       []float64{-1.1, 5, 0, 9, 19, 22},
-			incX:    1,
-			incY:    1,
-			trueAns: [][]float64{{3.5, -7.6, 3.5, -13.2, -36.89, -53}, {5.9, -12.2, 3.3, -30.4, -50.8, -74.7}, {-1.3, -4.3, -9.7, -3.1, 8.9, 8.9}},
+			x:    []float64{-2, -3, 0},
+			y:    []float64{-1.1, 5, 0, 9, 19, 22},
+			incX: 1,
+			incY: 1,
+			want: [][]float64{{3.5, -7.6, 3.5, -13.2, -36.89, -53}, {5.9, -12.2, 3.3, -30.4, -50.8, -74.7}, {-1.3, -4.3, -9.7, -3.1, 8.9, 8.9}},
 		},
 		{
 			name: "M gt N inc not 1",
@@ -81,11 +81,11 @@ func DgerTest(t *testing.T, blasser Dgerer) {
 				{8, 9, -10},
 				{-12, -14, -6},
 			},
-			x:       []float64{-2, -3, 0, 1, 2, 6, 0, 9, 7},
-			y:       []float64{-1.1, 5, 0, 8, 7, -5, 7},
-			incX:    2,
-			incY:    3,
-			trueAns: [][]float64{{3.5, -13.6, -10.5}, {2.6, 2.8, 3.3}, {-3.5, 11.7, 4.3}, {8, 9, -10}, {-19.700000000000003, 42, 43}},
+			x:    []float64{-2, -3, 0, 1, 2, 6, 0, 9, 7},
+			y:    []float64{-1.1, 5, 0, 8, 7, -5, 7},
+			incX: 2,
+			incY: 3,
+			want: [][]float64{{3.5, -13.6, -10.5}, {2.6, 2.8, 3.3}, {-3.5, 11.7, 4.3}, {8, 9, -10}, {-19.700000000000003, 42, 43}},
 		},
 		{
 			name: "M eq N inc not 1",
@@ -96,11 +96,11 @@ func DgerTest(t *testing.T, blasser Dgerer) {
 				{2.6, 2.8, 3.3},
 				{-1.3, -4.3, -9.7},
 			},
-			x:       []float64{-2, -3, 0, 8, 7, -9, 7, -6, 12, 6, 6, 6, -11},
-			y:       []float64{-1.1, 5, 0, 0, 9, 8, 6},
-			incX:    4,
-			incY:    3,
-			trueAns: [][]float64{{3.5, 2.4, -8.5}, {-5.1, 2.8, 45.3}, {-14.5, -4.3, 62.3}},
+			x:    []float64{-2, -3, 0, 8, 7, -9, 7, -6, 12, 6, 6, 6, -11},
+			y:    []float64{-1.1, 5, 0, 0, 9, 8, 6},
+			incX: 4,
+			incY: 3,
+			want: [][]float64{{3.5, 2.4, -8.5}, {-5.1, 2.8, 45.3}, {-14.5, -4.3, 62.3}},
 		},
 		{
 			name: "M lt N inc not 1",
@@ -111,22 +111,22 @@ func DgerTest(t *testing.T, blasser Dgerer) {
 				{2.6, 2.8, 3.3, -3.4, 6.2, -8.7},
 				{-1.3, -4.3, -9.7, -3.1, 8.9, 8.9},
 			},
-			x:       []float64{-2, -3, 0, 0, 8, 0, 9, -3},
-			y:       []float64{-1.1, 5, 0, 9, 19, 22, 11, -8.11, -9.22, 9.87, 7},
-			incX:    3,
-			incY:    2,
-			trueAns: [][]float64{{3.5, 2.4, -34.5, -17.2, 19.55, -23}, {2.6, 2.8, 3.3, -3.4, 6.2, -8.7}, {-11.2, -4.3, 161.3, 95.9, -74.08, 71.9}},
+			x:    []float64{-2, -3, 0, 0, 8, 0, 9, -3},
+			y:    []float64{-1.1, 5, 0, 9, 19, 22, 11, -8.11, -9.22, 9.87, 7},
+			incX: 3,
+			incY: 2,
+			want: [][]float64{{3.5, 2.4, -34.5, -17.2, 19.55, -23}, {2.6, 2.8, 3.3, -3.4, 6.2, -8.7}, {-11.2, -4.3, 161.3, 95.9, -74.08, 71.9}},
 		},
 		{
-			name:    "Y NaN element",
-			m:       1,
-			n:       1,
-			a:       [][]float64{{1.3}},
-			x:       []float64{1.3},
-			y:       []float64{math.NaN()},
-			incX:    1,
-			incY:    1,
-			trueAns: [][]float64{{math.NaN()}},
+			name: "Y NaN element",
+			m:    1,
+			n:    1,
+			a:    [][]float64{{1.3}},
+			x:    []float64{1.3},
+			y:    []float64{math.NaN()},
+			incX: 1,
+			incY: 1,
+			want: [][]float64{{math.NaN()}},
 		},
 		{
 			name: "M eq N large inc 1",
@@ -145,7 +145,7 @@ func DgerTest(t *testing.T, blasser Dgerer) {
 			},
 			incX: 1,
 			incY: 1,
-			trueAns: [][]float64{
+			want: [][]float64{
 				{-11.2, 151.64, -186.34, -97.58, 116.12, 26.92, 136.45},
 				{-4.6, -108.79, 169.1, 50.1, -54, -5.8, -102.7},
 				{137.12, 1890.256, -2534.816, -1050.792, 1563.058, 284.308, 1866.28},
@@ -172,7 +172,7 @@ func DgerTest(t *testing.T, blasser Dgerer) {
 			},
 			incX: 3,
 			incY: 4,
-			trueAns: [][]float64{
+			want: [][]float64{
 				{-11.2, 151.64, -186.34, -97.58, 116.12, 26.92, 136.45},
 				{-4.6, -108.79, 169.1, 50.1, -54, -5.8, -102.7},
 				{137.12, 1890.256, -2534.816, -1050.792, 1563.058, 284.308, 1866.28},
@@ -197,14 +197,14 @@ func DgerTest(t *testing.T, blasser Dgerer) {
 		aFlat := flatten(a)
 		blasser.Dger(test.m, test.n, alpha, x, test.incX, y, test.incY, aFlat, test.n)
 		ans := unflatten(aFlat, test.m, test.n)
-		dgercomp(t, x, test.x, y, test.y, ans, test.trueAns, test.name+" row maj")
+		dgercomp(t, x, test.x, y, test.y, ans, test.want, test.name+" row maj")
 
 		// Test with different alpha
 		alpha = 4.0
 		aFlat = flatten(a)
 		blasser.Dger(test.m, test.n, alpha, x, test.incX, y, test.incY, aFlat, test.n)
 		ans = unflatten(aFlat, test.m, test.n)
-		trueCopy := sliceOfSliceCopy(test.trueAns)
+		trueCopy := sliceOfSliceCopy(test.want)
 		for i := range trueCopy {
 			for j := range trueCopy[i] {
 				trueCopy[i][j] = alpha*(trueCopy[i][j]-a[i][j]) + a[i][j]
