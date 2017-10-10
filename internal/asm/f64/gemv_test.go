@@ -12,7 +12,6 @@ import (
 )
 
 type DgemvCase struct {
-	Name  string
 	m     int
 	n     int
 	A     []float64
@@ -39,7 +38,6 @@ type DgemvSubcase struct {
 
 var DgemvCases = []DgemvCase{
 	{ // 3x3
-		Name:  "M_eq_N",
 		trans: false,
 		m:     3,
 		n:     3,
@@ -107,9 +105,8 @@ var DgemvCases = []DgemvCase{
 	},
 
 	{ // 5x3
-		Name: "M_gt_N",
-		m:    5,
-		n:    3,
+		m: 5,
+		n: 3,
 		A: []float64{
 			4.1, 6.2, 8.1,
 			9.6, 3.5, 9.1,
@@ -176,7 +173,6 @@ var DgemvCases = []DgemvCase{
 	},
 
 	{ // 3x5
-		Name:  "M_lt_N",
 		trans: false,
 		m:     3,
 		n:     5,
@@ -243,15 +239,14 @@ var DgemvCases = []DgemvCase{
 		},
 	},
 
-	{ // 7x7
-		Name:  "M_eq_N_Lg",
+	{ // 7x7 & nan test
 		trans: true,
 		m:     7,
 		n:     7,
 		A: []float64{
 			4.1, 6.2, 8.1, 2.5, 3.3, 7.4, 9.3,
 			9.6, 3.5, 9.1, 1.2, 5.4, 4.8, 8.7,
-			10, 7, 3, 2, 4, 1, 12,
+			10, 7, 3, 2, 4, nan, 12,
 			9.6, 3.5, 9.1, 1.2, 5.4, 4.8, 8.7,
 			4.1, 6.2, 8.1, 2.5, 3.3, 7.4, 9.3,
 			10, 7, 3, 2, 4, 1, 12,
@@ -262,55 +257,55 @@ var DgemvCases = []DgemvCase{
 
 		NoTrans: []DgemvSubcase{ // (4x4, 4x2, 4x1, 2x4, 2x2, 2x1, 1x4, 1x2, 1x1)
 			{alpha: 0, beta: 0,
-				want:      []float64{0, 0, 0, 0, 0, 0, 0},
-				wantRevX:  []float64{0, 0, 0, 0, 0, 0, 0},
-				wantRevY:  []float64{0, 0, 0, 0, 0, 0, 0},
-				wantRevXY: []float64{0, 0, 0, 0, 0, 0, 0},
+				want:      []float64{0, 0, nan, 0, 0, 0, 0},
+				wantRevX:  []float64{0, 0, nan, 0, 0, 0, 0},
+				wantRevY:  []float64{0, 0, 0, 0, nan, 0, 0},
+				wantRevXY: []float64{0, 0, 0, 0, nan, 0, 0},
 			},
 			{alpha: 0, beta: 1,
-				want:      []float64{7, 8, 9, 10, 11, 12, 13},
-				wantRevX:  []float64{7, 8, 9, 10, 11, 12, 13},
-				wantRevY:  []float64{7, 8, 9, 10, 11, 12, 13},
-				wantRevXY: []float64{7, 8, 9, 10, 11, 12, 13},
+				want:      []float64{7, 8, nan, 10, 11, 12, 13},
+				wantRevX:  []float64{7, 8, nan, 10, 11, 12, 13},
+				wantRevY:  []float64{7, 8, 9, 10, nan, 12, 13},
+				wantRevXY: []float64{7, 8, 9, 10, nan, 12, 13},
 			},
 			{alpha: 1, beta: 0,
-				want:      []float64{176.8, 165.4, 151, 165.4, 176.8, 151, 165.4},
-				wantRevX:  []float64{150.4, 173, 161, 173, 150.4, 161, 173},
-				wantRevY:  []float64{165.4, 151, 176.8, 165.4, 151, 165.4, 176.8},
-				wantRevXY: []float64{173, 161, 150.4, 173, 161, 173, 150.4},
+				want:      []float64{176.8, 165.4, nan, 165.4, 176.8, 151, 165.4},
+				wantRevX:  []float64{150.4, 173, nan, 173, 150.4, 161, 173},
+				wantRevY:  []float64{165.4, 151, 176.8, 165.4, nan, 165.4, 176.8},
+				wantRevXY: []float64{173, 161, 150.4, 173, nan, 173, 150.4},
 			},
 			{alpha: 8, beta: -6,
-				want:      []float64{1372.4, 1275.2, 1154, 1263.2, 1348.4, 1136, 1245.2},
-				wantRevX:  []float64{1161.2, 1336, 1234, 1324, 1137.2, 1216, 1306},
-				wantRevY:  []float64{1281.2, 1160, 1360.4, 1263.2, 1142, 1251.2, 1336.4},
-				wantRevXY: []float64{1342, 1240, 1149.2, 1324, 1222, 1312, 1125.2},
+				want:      []float64{1372.4, 1275.2, nan, 1263.2, 1348.4, 1136, 1245.2},
+				wantRevX:  []float64{1161.2, 1336, nan, 1324, 1137.2, 1216, 1306},
+				wantRevY:  []float64{1281.2, 1160, 1360.4, 1263.2, nan, 1251.2, 1336.4},
+				wantRevXY: []float64{1342, 1240, 1149.2, 1324, nan, 1312, 1125.2},
 			},
 		},
 
 		Trans: []DgemvSubcase{ // (4x4, 2x4, 1x4, 4x2, 2x2, 1x2, 4x1, 2x1, 1x1)
 			{alpha: 0, beta: 0,
-				want:      []float64{0, 0, 0, 0, 0, 0, 0},
-				wantRevX:  []float64{0, 0, 0, 0, 0, 0, 0},
-				wantRevY:  []float64{0, 0, 0, 0, 0, 0, 0},
-				wantRevXY: []float64{0, 0, 0, 0, 0, 0, 0},
+				want:      []float64{0, 0, 0, 0, 0, nan, 0},
+				wantRevX:  []float64{0, 0, 0, 0, 0, nan, 0},
+				wantRevY:  []float64{0, nan, 0, 0, 0, 0, 0},
+				wantRevXY: []float64{0, nan, 0, 0, 0, 0, 0},
 			},
 			{alpha: 0, beta: 1,
-				want:      []float64{1, 2, 3, 4, 5, 6, 7},
-				wantRevX:  []float64{1, 2, 3, 4, 5, 6, 7},
-				wantRevY:  []float64{1, 2, 3, 4, 5, 6, 7},
-				wantRevXY: []float64{1, 2, 3, 4, 5, 6, 7},
+				want:      []float64{1, 2, 3, 4, 5, nan, 7},
+				wantRevX:  []float64{1, 2, 3, 4, 5, nan, 7},
+				wantRevY:  []float64{1, nan, 3, 4, 5, 6, 7},
+				wantRevXY: []float64{1, nan, 3, 4, 5, 6, 7},
 			},
 			{alpha: 1, beta: 0,
-				want:      []float64{581.4, 367.1, 490.9, 124.2, 310.8, 303, 689.1},
-				wantRevX:  []float64{558.6, 370.9, 499.1, 127.8, 305.2, 321, 684.9},
-				wantRevY:  []float64{689.1, 303, 310.8, 124.2, 490.9, 367.1, 581.4},
-				wantRevXY: []float64{684.9, 321., 305.2, 127.8, 499.1, 370.9, 558.6},
+				want:      []float64{581.4, 367.1, 490.9, 124.2, 310.8, nan, 689.1},
+				wantRevX:  []float64{558.6, 370.9, 499.1, 127.8, 305.2, nan, 684.9},
+				wantRevY:  []float64{689.1, nan, 310.8, 124.2, 490.9, 367.1, 581.4},
+				wantRevXY: []float64{684.9, nan, 305.2, 127.8, 499.1, 370.9, 558.6},
 			},
 			{alpha: 8, beta: -6,
-				want:      []float64{4645.2, 2924.8, 3909.2, 969.6, 2456.4, 2388, 5470.8},
-				wantRevX:  []float64{4462.8, 2955.2, 3974.8, 998.4, 2411.6, 2532, 5437.2},
-				wantRevY:  []float64{5506.8, 2412, 2468.4, 969.6, 3897.2, 2900.8, 4609.2},
-				wantRevXY: []float64{5473.2, 2556., 2423.6, 998.4, 3962.8, 2931.2, 4426.8},
+				want:      []float64{4645.2, 2924.8, 3909.2, 969.6, 2456.4, nan, 5470.8},
+				wantRevX:  []float64{4462.8, 2955.2, 3974.8, 998.4, 2411.6, nan, 5437.2},
+				wantRevY:  []float64{5506.8, nan, 2468.4, 969.6, 3897.2, 2900.8, 4609.2},
+				wantRevXY: []float64{5473.2, nan, 2423.6, 998.4, 3962.8, 2931.2, 4426.8},
 			},
 		},
 	},
@@ -344,7 +339,7 @@ func dgemvcomp(t *testing.T, test DgemvCase, trans bool, cas DgemvSubcase, i int
 		test.x, test.y = test.y, test.x
 	}
 	GemvT2 := GemvT
-	prefix := fmt.Sprintf("%s - (%vx%v) t:%v (a:%v,b:%v)", test.Name, test.m, test.n, trans, cas.alpha, cas.beta)
+	prefix := fmt.Sprintf("Test (%vx%v) t:%v (a:%v,b:%v)", test.m, test.n, trans, cas.alpha, cas.beta)
 	xg, yg := guardVector(test.x, xGdVal, gdLn), guardVector(test.y, yGdVal, gdLn)
 	x, y := xg[gdLn:len(xg)-gdLn], yg[gdLn:len(yg)-gdLn]
 	ag := guardVector(test.A, aGdVal, gdLn)
