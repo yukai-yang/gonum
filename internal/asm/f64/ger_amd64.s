@@ -434,7 +434,7 @@ r1end:
 end:
 	RET
 
-inc:  // Alogrithm for incY > 0 ( split loads in kernel )
+inc:  // Algorithm for incY > 0 ( split loads in kernel )
 
 	MOVQ incY+80(FP), INC_Y       // INC_Y = incY * sizeof(float64)
 	SHLQ $3, INC_Y

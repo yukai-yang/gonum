@@ -14,7 +14,7 @@ const (
 	msgVal      = "%v: unexpected value at %v Got: %v Expected: %v"
 	msgGuard    = "%v: Guard violated in %s vector %v %v"
 	msgReadOnly = "%v: modified read-only %v argument"
-	ε           = 1e-8
+	epsilon     = 1e-8
 )
 
 var (
@@ -146,9 +146,9 @@ func same(a, b float64) bool {
 	return a == b || (math.IsNaN(a) && math.IsNaN(b))
 }
 
-// within tests for nan-aware equality within .
+// within tests for nan-aware equality within epsilon.
 func within(a, b float64) bool {
-	return same(a, b) || math.Abs(a-b) <= ε
+	return same(a, b) || math.Abs(a-b) <= epsilon
 }
 
 var ( // Offset sets for testing alignment handling in Unitary assembly functions.

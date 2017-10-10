@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build go1.7
-
 package f64
 
 import (
@@ -178,12 +176,6 @@ func TestGer(t *testing.T) {
 	}
 }
 
-type dgerWrap struct{}
-
-func (d dgerWrap) Dger(m, n int, alpha float64, x []float64, incX int, y []float64, incY int, a []float64, lda int) {
-	Ger(uintptr(m), uintptr(n), alpha, x, uintptr(incX), y, uintptr(incY), a, uintptr(lda))
-}
-
 func BenchmarkGer(t *testing.B) {
 	const alpha = 3
 	for _, dims := range newIncSet(3, 10, 30, 100, 300, 1e3, 3e3, 1e4) {
@@ -196,11 +188,7 @@ func BenchmarkGer(t *testing.B) {
 				x, y, a := gerData(m, n, inc.x, inc.y)
 				b.ResetTimer()
 				for i := 0; i < b.N; i++ {
-					Ger(uintptr(m), uintptr(n),
-						alpha,
-						x, uintptr(inc.x),
-						y, uintptr(inc.y),
-						a, uintptr(n))
+					Ger(uintptr(m), uintptr(n), alpha, x, uintptr(inc.x), y, uintptr(inc.y), a, uintptr(n))
 				}
 			})
 
