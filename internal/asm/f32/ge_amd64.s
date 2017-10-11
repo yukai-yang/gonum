@@ -40,8 +40,8 @@
 	MOVSS  alpha+16(FP), ALPHA \
 	SHUFPS $0, ALPHA, ALPHA
 
-#define LOAD4 \
-	PREFETCHNTA 16*SIZE(X_PTR )   \
+#define LOAD_SCALED4 \
+	PREFETCHNTA 16*SIZE(X_PTR)    \
 	MOVDDUP     (X_PTR), X1       \
 	MOVDDUP     2*SIZE(X_PTR), X3 \
 	MOVSHDUP    X1, X2            \
@@ -53,20 +53,20 @@
 	MULPS       ALPHA, X3         \
 	MULPS       ALPHA, X4
 
-#define LOAD2 \
+#define LOAD_SCALED2 \
 	MOVDDUP  (X_PTR), X1 \
 	MOVSHDUP X1, X2      \
 	MOVSLDUP X1, X1      \
 	MULPS    ALPHA, X1   \
 	MULPS    ALPHA, X2
 
-#define LOAD1 \
+#define LOAD_SCALED1 \
 	MOVSS  (X_PTR), X1 \
 	SHUFPS $0, X1, X1  \
 	MULPS  ALPHA, X1
 
-#define LOAD4_INC \
-	PREFETCHNTA (X_PTR )(INC_X*8)     \
+#define LOAD_SCALED4_INC \
+	PREFETCHNTA (X_PTR)(INC_X*8)      \
 	MOVSS       (X_PTR), X1           \
 	MOVSS       (X_PTR)(INC_X*1), X2  \
 	MOVSS       (X_PTR)(INC_X*2), X3  \
@@ -80,7 +80,7 @@
 	MULPS       ALPHA, X3             \
 	MULPS       ALPHA, X4
 
-#define LOAD2_INC \
+#define LOAD_SCALED2_INC \
 	MOVSS  (X_PTR), X1          \
 	MOVSS  (X_PTR)(INC_X*1), X2 \
 	SHUFPS $0, X1, X1           \
@@ -381,7 +381,7 @@ TEXT ·Ger(SB), 0, $16-120
 r4:
 
 	// LOAD 4
-	LOAD4
+	LOAD_SCALED4
 
 	MOVQ N_DIM, N
 	SHRQ $KERNELSIZE, N
@@ -444,7 +444,7 @@ r2:
 	JZ    r1
 
 	// LOAD 2
-	LOAD2
+	LOAD_SCALED2
 
 	MOVQ N_DIM, N
 	SHRQ $KERNELSIZE, N
@@ -504,7 +504,7 @@ r1:
 	JZ    end
 
 	// LOAD 1
-	LOAD1
+	LOAD_SCALED1
 
 	MOVQ N_DIM, N
 	SHRQ $KERNELSIZE, N
@@ -594,7 +594,7 @@ inc:  // Alogrithm for incY > 0 ( split loads in kernel )
 
 inc_r4:
 	// LOAD 4
-	LOAD4_INC
+	LOAD_SCALED4_INC
 
 	MOVQ N_DIM, N
 	SHRQ $KERNELSIZE, N
@@ -656,7 +656,7 @@ inc_r2:
 	JZ    inc_r1
 
 	// LOAD 2
-	LOAD2_INC
+	LOAD_SCALED2_INC
 
 	MOVQ N_DIM, N
 	SHRQ $KERNELSIZE, N
@@ -715,7 +715,7 @@ inc_r1:
 	JZ    end
 
 	// LOAD 1
-	LOAD1
+	LOAD_SCALED1
 
 	MOVQ N_DIM, N
 	SHRQ $KERNELSIZE, N
