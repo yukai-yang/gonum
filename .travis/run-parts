@@ -11,9 +11,25 @@ if [[ "${dir}" = "" || ! -d "${dir}" ]]; then
     exit 1
 fi
 
+echo ======
+echo go env at start:
+git diff
+echo ======
+for v in GOMOD GOFLAGS GOPATH; do
+	echo $v: $(go env $v)
+done
 for f in $(echo ${dir%/}/*); do
 	[ -d $f ] && continue
 	[ ! -x $f ] && continue
 	echo "+$f"
+	echo diff before:
+	git diff
 	$f
+	echo go env after $f
+	for v in GOMOD GOFLAGS GOPATH; do
+		echo $v: $(go env $v)
+	done
+	echo diff after:
+	git diff
+	echo ======
 done
