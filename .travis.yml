@@ -91,6 +91,7 @@ before_install:
  - popd
 
  - ${TRAVIS_BUILD_DIR}/.travis/run-parts ${TRAVIS_BUILD_DIR}/.travis/deps.d/${TRAVIS_OS_NAME}
+ - git diff
 
 addons:
   apt:
