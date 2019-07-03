@@ -435,6 +435,38 @@ func (s *SymDense) RankTwo(a Symmetric, alpha float64, x, y Vector) {
 	}
 }
 
+// SymCrossProd performs a product between x', a and x,
+// and then placing the result in the receiver.
+// if a is nil, then it will be the identity
+// s = x' * a * x
+func (s *SymDense) SymCrossProd(a Symmetric, x Matrix) {
+	if x == nil {
+		panic(ErrZeroLength)
+	}
+	n, m := x.Dims()
+
+	if a != nil {
+		if a.Symmetric() != n {
+			panic(ErrShape)
+		}
+	} else {
+		tmp := make([]float64, n)
+		for i := 0; i < n; i++ {
+			tmp[i] = 1
+		}
+		a = NewDiagDense(n, tmp)
+	}
+
+	s.reuseAs(m)
+	xx := DenseCopyOf(x)
+
+	for i := 0; i < n; i++ {
+		for j := 0; j < n; j++ {
+			s.RankTwo(s, a.At(i, j), xx.RowView(i), xx.RowView(j))
+		}
+	}
+}
+
 // ScaleSym multiplies the elements of a by f, placing the result in the receiver.
 func (s *SymDense) ScaleSym(f float64, a Symmetric) {
 	n := a.Symmetric()
